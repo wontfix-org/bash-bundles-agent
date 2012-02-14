@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+BBAGENT_FIND_KEYS=${BBAGENT_FIND_KEYS:=find $HOME/.ssh/ -name "*.key" -type f}
+BBAGENT_KEYS=$($BBAGENT_FIND_KEYS)
+
+if [ -n "$keys" ] ; then
+	BBAGENT_ENV_FILE="$HOME/.agent-env"
+
+	[ -f $BBAGENT_ENV_FILE ] && source $BBAGENT_ENV_FILE
+
+	if [ -z "$SSH_AGENT_PID" -o ! -d /proc/$SSH_AGENT_PID/  ] ; then
+		ssh-agent | grep -v "Agent pid" > $BBAGENT_ENV_FILE
+		source $BBAGENT_ENV_FILE
+	fi
+
+	BBAGENT_ALREADY=$(ssh-add -l | cut -d" " -f3)
+
+	for BBAGENT_KEY in $BBAGENT_KEY ; do
+		echo $BBAGENT_ALREADY | grep -q $BBAGENT_KEY || ssh-add $BBAGENT_KEY
+	done
+
+	unset BBAGENT_ALREADY
+fi
