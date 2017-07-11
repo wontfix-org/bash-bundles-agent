@@ -2,12 +2,11 @@
 
 BBAGENT_FIND_KEYS=${BBAGENT_FIND_KEYS:=find $HOME/.ssh/ -name "*.key" -type f}
 BBAGENT_KEYS=$($BBAGENT_FIND_KEYS)
+BBAGENT_ENV_FILE="$HOME/.agent-env"
+
+[ -f $BBAGENT_ENV_FILE ] && source $BBAGENT_ENV_FILE
 
 if [ -n "$BBAGENT_KEYS" ] ; then
-    BBAGENT_ENV_FILE="$HOME/.agent-env"
-
-    [ -f $BBAGENT_ENV_FILE ] && source $BBAGENT_ENV_FILE
-
     ssh-add -l &>/dev/null
     if [ "$?" != "0" ] ; then
         ssh-agent | grep -v "Agent pid" > $BBAGENT_ENV_FILE
